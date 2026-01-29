@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸运大抽奖</title>
+    <style>
+        :root {
+            --primary-color: #ff4757;
+            --secondary-color: #2f3542;
+            --bg-color: #f1f2f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2rem 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .display-box {
+            background-color: #f8f9fa;
+            border: 3px solid var(--secondary-color);
+            border-radius: 15px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        #actionBtn {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        #actionBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.6);
+        }
+
+        #actionBtn:active {
+            transform: translateY(1px);
+        }
+
+        #actionBtn.stop {
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 15px rgba(47, 53, 66, 0.4);
+        }
+        
+        #actionBtn.stop:hover {
+             box-shadow: 0 6px 20px rgba(47, 53, 66, 0.6);
+        }
+
+        .settings {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            margin-top: 0.5rem;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>✨ 幸运大抽奖 ✨</h1>
+    
+    <div class="display-box" id="result">
+        准备好了吗？
+    </div>
+
+    <div class="controls">
+        <button id="actionBtn">开始抽奖</button>
+    </div>
+
+    <div class="settings">
+        <label for="itemsInput">抽奖名单 (用逗号或换行分隔):</label>
+        <textarea id="itemsInput" placeholder="输入奖品或名字...">特等奖, 一等奖, 二等奖, 三等奖, 幸运奖, 谢谢参与</textarea>
+    </div>
+</div>
+
+<script>
+    const resultDisplay = document.getElementById('result');
+    const actionBtn = document.getElementById('actionBtn');
+    const itemsInput = document.getElementById('itemsInput');
+    
+    let timer = null;
+    let isRunning = false;
+    let items = [];
+
+    // 获取名单列表
+    function getItems() {
+        const text = itemsInput.value;
+        // 支持逗号、中文逗号、换行符分隔
+        return text.split(/[,\uff0c\n]/)
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
+    }
+
+    actionBtn.addEventListener('click', () => {
+        if (isRunning) {
+            // 停止抽奖
+            clearInterval(timer);
+            isRunning = false;
+            actionBtn.textContent = '开始抽奖';
+            actionBtn.classList.remove('stop');
+            
+            // 简单的闪烁效果表示选中
+            let flashCount = 0;
+            const flashTimer = setInterval(() => {
+                resultDisplay.style.backgroundColor = flashCount % 2 === 0 ? '#ffeaa7' : '#f8f9fa';
+                flashCount++;
+                if (flashCount > 5) {
+                    clearInterval(flashTimer);
+                    resultDisplay.style.backgroundColor = '#f8f9fa';
+                }
+            }, 100);
+            
+        } else {
+            // 开始抽奖
+            items = getItems();
+            
+            if (items.length === 0) {
+                alert('请输入至少一个抽奖项！');
+                return;
+            }
+            
+            if (items.length === 1) {
+                resultDisplay.textContent = items[0];
+                return;
+            }
+
+            isRunning = true;
+            actionBtn.textContent = '停 止';
+            actionBtn.classList.add('stop');
+            
+            timer = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * items.length);
+                resultDisplay.textContent = items[randomIndex];
+            }, 50); // 50ms 切换一次，速度较快
+        }
+    });
+</script>
+
+</body>
+</html>
